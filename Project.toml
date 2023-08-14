@@ -1,0 +1,4 @@
+name = "DAESolve"
+uuid = "e97b5281-e633-4c46-86d2-72ea63110c3f"
+authors = ["Thomas Burton <tburton5572@gmail.com>"]
+version = "0.1.0"
