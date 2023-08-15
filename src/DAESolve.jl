@@ -26,22 +26,38 @@ function _update!(q_new, q_old, F, G, Δτ::Real, M::AbstractMatrix, rootopts::O
 end
 
 # evolve the system until a condition is met
-function solvedae!(q, q_init, F, G, Δτ::Real, M::AbstractMatrix=I; stopcrit=nothing, rootopts::Options=Options(), verbose::Bool=false)
+function solvedae!(q, q_init, F, G, Δτ::Real, T::Real, M::AbstractMatrix=I; stopcrit=(q,i)->false, rootopts::Options=Options(), verbose::Bool=false)
     # initialise variable for old state
+    q_new = copy(q_init)
+    q_old = copy(q_init)
 
-    # determine mass matrix if necessary
+    # if mass matrix isn't provided construct our own
     if M isa UniformScaling
         M = MassMatrix(length(F(q_init)))
     end
 
-    # if mass matrix isn't provided construct our own
+    # print header if verbose
+    verbose && display_header()
+
     # loop over time steps
-        # check if stopping criteria has been met
+    i = 0
+    while (i - 1)*Δτ <= T
         # update the state at each time step
+        _update!(q_new, q_old, F, G, Δτ, M, rootopts)
+
+        # check if stopping criteria has been met
+        stopcrit(q_new, i) && break
+
         # update old state with new state and go to beginning of loop
+        q_old .= q_new
+
         # do some printing
-    # return the solution
+        verbose && display_state(q_new, F(q_new), G(q_new), i, Δτ)
+    end
+    q .= q_new
+
+    return q
 end
-solve(q_init, F, G, Δτ; stopcrit=nothing, rootopts=Options(), verbose::Bool=false) = solve!(copy(q_init), q_init, F, G, Δτ, stopcrit=stopcrit, rootopts=rootopts, verbose=verbose)
+solvedae(q_init, F, G, Δτ; stopcrit=nothing, rootopts=Options(), verbose::Bool=false) = solvedae!(copy(q_init), q_init, F, G, Δτ, stopcrit=stopcrit, rootopts=rootopts, verbose=verbose)
 
 end
