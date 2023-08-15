@@ -7,7 +7,7 @@ using NKRoots
 export solvedae!
 
 # update the state given the evolution and constraints
-function _update!(q_new, q_old, F, G, Δτ, M, rootopts)
+function _update!(q_new, q_old, F, G, Δτ::Real, M::AbstractMatrix, rootopts::Options)
     # define an objective function from F and G
     function objective!(out, q_new)
         @views out[1:size(M, 1)] .= M*(q_new .- q_old) .+ Δτ.*F(q_new)
@@ -17,14 +17,14 @@ function _update!(q_new, q_old, F, G, Δτ, M, rootopts)
     end
 
     # perform the root finding with nkroot!
-    # FIXME: redo nkroots so that it can use a pre-defined output for the objective instead of initialising a new one
+    # FIXME: extend NKRoots and GMRES interfaces for proper in-place computations all the way
     nkroot!(objective!, q_new, rootopts)
 
     return q_new
 end
 
 # evolve the system until a condition is met
-function solvedae!(q, q_init, F, G, Δτ, M::AbstractMatrix; stopcrit=nothing, rootopts=Options(), verbose::Bool=false)
+function solvedae!(q, q_init, F, G, Δτ::Real, M::AbstractMatrix; stopcrit=nothing, rootopts::Options=Options(), verbose::Bool=false)
     # initialise variable for old state
     # if mass matrix isn't provided construct our own
     # loop over time steps
