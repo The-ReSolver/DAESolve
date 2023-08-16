@@ -12,7 +12,6 @@
     @test p == q[1:length(p)]
 
     mul!(p, M2, q)
-    @show M2.D round.(q; digits=5) round.(p; digits=5)
 
     i = 1
     for j in M2.D

@@ -4,7 +4,7 @@ using LinearAlgebra
 
 using NKRoots
 
-export MassMatrix, solvedae!
+export MassMatrix, solvedae!, solvedae
 
 include("massmatrix.jl")
 
@@ -13,8 +13,8 @@ include("massmatrix.jl")
 function _update!(q_new, q_old, F, G, Δτ::Real, M::AbstractMatrix, rootopts::Options)
     # define an objective function from F and G
     function objective!(out, q_new)
-        @views out[1:size(M, 1)] .= LinearAlgebra.mul!(similar(q_old), M, q_new .- q_old) .+ Δτ.*F(q_new)
-        @views out[(size(M, 1) + 1):end] .= G(q_new)
+        out[1:size(M)] .= LinearAlgebra.mul!(similar(q_old), M, q_new .- q_old) .- Δτ.*F(q_new)
+        out[(size(M) + 1):end] .= G(q_new)
 
         return out
     end
@@ -26,13 +26,13 @@ function _update!(q_new, q_old, F, G, Δτ::Real, M::AbstractMatrix, rootopts::O
 end
 
 # evolve the system until a condition is met
-function solvedae!(q, q_init, F, G, Δτ::Real, T::Real, M::AbstractMatrix=I; stopcrit=(q,i)->false, rootopts::Options=Options(), verbose::Bool=false)
+function solvedae!(q, q_init, F, G, Δτ::Real, T::Real, M::Union{AbstractMatrix, Nothing}=nothing; stopcrit=(q,i)->false, rootopts::Options=Options(), verbose::Bool=false)
     # initialise variable for old state
     q_new = copy(q_init)
     q_old = copy(q_init)
 
     # if mass matrix isn't provided construct our own
-    if M isa UniformScaling
+    if isnothing(M)
         M = MassMatrix(length(F(q_init)))
     end
 
@@ -58,6 +58,6 @@ function solvedae!(q, q_init, F, G, Δτ::Real, T::Real, M::AbstractMatrix=I; st
 
     return q
 end
-solvedae(q_init, F, G, Δτ; stopcrit=nothing, rootopts=Options(), verbose::Bool=false) = solvedae!(copy(q_init), q_init, F, G, Δτ, stopcrit=stopcrit, rootopts=rootopts, verbose=verbose)
+solvedae(q_init, F, G, Δτ, T, M=nothing; stopcrit=(q,i)->false, rootopts=Options(), verbose::Bool=false) = solvedae!(similar(q_init), q_init, F, G, Δτ, T, M, stopcrit=stopcrit, rootopts=rootopts, verbose=verbose)
 
 end
