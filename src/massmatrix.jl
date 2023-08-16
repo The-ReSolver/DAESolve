@@ -11,7 +11,7 @@ MassMatrix(N::Int64) = MassMatrix([n for n in 1:N])
 # efficiently pick the indices of the state that are evolving
 function LinearAlgebra.mul!(p::V, M::MassMatrix, q::V) where {V}
     for i in eachindex(M.D)
-        p[i] = q[D[i]]
+        p[i] = q[M.D[i]]
     end
 
     return p
