@@ -1,6 +1,7 @@
 using Test
 using Random
 using LinearAlgebra
+using DifferentialEquations
 
 using DAESolve
 
