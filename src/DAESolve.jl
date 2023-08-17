@@ -13,8 +13,8 @@ include("massmatrix.jl")
 function _update!(q_new, q_old, F, G, Δτ::Real, M::AbstractMatrix, rootopts::Options)
     # define an objective function from F and G
     function objective!(out, q_new)
-        out[1:length(M)] .= mul!(zeros(eltype(q_new), length(M)), M, q_new .- q_old) .- Δτ.*F(q_new)
-        out[(length(M) + 1):end] .= G(q_new)
+        @views out[1:length(M)] .= mul!(similar(q_new, length(M)), M, q_new .- q_old) .- Δτ.*F(q_new)
+        @views out[(length(M) + 1):end] .= G(q_new)
 
         return out
     end
