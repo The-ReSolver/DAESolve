@@ -3,12 +3,12 @@
 
 # evolution and constraint functions for the DAE of a pendulum
 function init_F(g, c)
-    function F(q)
-        x = q[1]
-        y = q[2]
-        u = q[3]
-        v = q[4]
-        λ = q[5]
+    function F(q1, q2)
+        x = q1[1]
+        y = q1[2]
+        u = q1[3]
+        v = q1[4]
+        λ = q2[1]
 
         out = zeros(4)
 
@@ -20,7 +20,7 @@ function init_F(g, c)
         return out
     end
 end
-G(q) = [q[1]^2 + q[2]^2 - 1]
+G(q1, q2) = [q1[1]^2 + q1[2]^2 - 1]
 
 # ode evolution for a pendulum
 function pendulum_evolution!(dθ, θ, p, t)
