@@ -8,7 +8,6 @@ export solvedae!, solvedae, Options
 
 # update the state given the evolution and constraints
 # TODO: IN-PLACE!!!
-# TODO: redo objective with new assumed interface
 function _update!(q1, q2, q1_old, F, G, Δτ::Real, rootopts::Options)
     # define an objective function from F and G
     function objective!(out, q)
@@ -48,13 +47,11 @@ function solvedae!(q1, q2, q1_init, q2_init, F, G, Δτ::Real; maxiter::Int=1000
 
     # print header if verbose
     verbose && display_header()
+    verbose && display_state(0, F(q1, q2), G(q1, q2))
 
     # loop over time steps
     i = 0
     while !(stopcrit(q1, q2, i)) && i < maxiter
-        # do some printing
-        verbose && display_state(i, F(q1, q2), G(q1, q2))
-
         # update the state at each time step
         _update!(q1, q2, q1_old, F, G, Δτ, rootopts)
 
@@ -62,7 +59,11 @@ function solvedae!(q1, q2, q1_init, q2_init, F, G, Δτ::Real; maxiter::Int=1000
         q1_old .= q1
         q2_old .= q2
 
+        # update iterator
         i += 1
+
+        # do some printing
+        verbose && display_state(i, F(q1, q2), G(q1, q2))
     end
 
     return q1, q2
